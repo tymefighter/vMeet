@@ -15,7 +15,9 @@ public class AuthUtils {
   }
 
   public static String getSessionId(HttpServletRequest servletRequest) {
-    return Arrays.stream(servletRequest.getCookies())
+    Cookie[] cookies = servletRequest.getCookies();
+
+    return cookies == null ? null : Arrays.stream(cookies)
         .filter(cookie -> cookie.getName().equals(SESSION_ID_COOKIE_NAME))
         .findFirst()
         .map(Cookie::getValue)

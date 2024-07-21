@@ -19,16 +19,23 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation(project(":graphql"))
-    implementation(project(":rest"))
     implementation(project(":authentication"))
-    implementation(project(":infra"))
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework:spring-webflux")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+dependencyManagement {
+    imports {
+        mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
+    }
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-parameters")
 }
