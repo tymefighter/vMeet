@@ -3,8 +3,8 @@ package com.vmeet.graphql;
 import com.vmeet.authentication.AuthService;
 import com.vmeet.authentication.LoginRequestDTO;
 import com.vmeet.data.user.UserRepository;
-import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
+import io.leangen.graphql.annotations.GraphQLNonNull;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class AuthenticationGraphQLAPI {
   }
 
   @GraphQLMutation(name = "login")
-  public boolean login(@GraphQLArgument(name = "loginRequestDTO") LoginRequestDTO loginRequestDTO) {
+  public boolean login(@GraphQLNonNull LoginRequestDTO loginRequestDTO) {
     return authService.login(loginRequestDTO);
   }
 
