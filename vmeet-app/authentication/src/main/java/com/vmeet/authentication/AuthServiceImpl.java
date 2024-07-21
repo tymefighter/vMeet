@@ -3,7 +3,9 @@ package com.vmeet.authentication;
 import com.vmeet.data.user.UserDTO;
 import com.vmeet.data.user.UserRepository;
 import com.vmeet.data.user.UserRequestDTO;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -12,6 +14,9 @@ import java.time.Duration;
 public class AuthServiceImpl implements AuthService {
 
   private static final Duration SESSION_EXPIRY_DURATION = Duration.ofHours(12);
+
+  private static final String SESSION_SCAN_PATTERN = "*";
+  private static final int SESSION_SCAN_BATCH_SIZE = 100;
 
   RedisTemplate<String, String> redisTemplate;
   UserRepository userRepository;
@@ -38,7 +43,29 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public boolean logout(LogoutRequestDTO logoutRequestDTO) {
-    return removeSession(logoutRequestDTO.getSessionId());
+    String sessionId = logoutRequestDTO.getSessionId();
+    return sessionId != null && removeSession(logoutRequestDTO.getSessionId());
+  }
+
+  @Override
+  public boolean logoutAllSessions(LogoutRequestDTO logoutRequestDTO) {
+    String userId = logoutRequestDTO.getUserId();
+    String sessionId = logoutRequestDTO.getSessionId();
+    if(userId == null && sessionId != null) {
+      userId = getUserId(sessionId);
+    }
+
+    return removeAllSessions(userId);
+  }
+
+  @Override
+  public ValidateSessionResponseDTO validateSession(String sessionId) {
+    if(sessionId == null) {
+      return ValidateSessionResponseDTO.invalidSession();
+    }
+
+    String userId = getUserId(sessionId);
+    return userId == null ? ValidateSessionResponseDTO.invalidSession() : ValidateSessionResponseDTO.validSession(userId);
   }
 
   private static String getSessionUserIdRedisKey(String sessionId) {
@@ -64,6 +91,13 @@ public class AuthServiceImpl implements AuthService {
     return sessionId;
   }
 
+  private String getUserId(String sessionId) {
+    String sessionUserIdRedisKey = getSessionUserIdRedisKey(sessionId);
+    String userId = redisTemplate.opsForValue().get(sessionUserIdRedisKey);
+
+    return userId;
+  }
+
   private boolean removeSession(String sessionId) {
     String sessionUserIdRedisKey = getSessionUserIdRedisKey(sessionId);
     String userId = redisTemplate.opsForValue().get(sessionUserIdRedisKey);
@@ -77,5 +111,25 @@ public class AuthServiceImpl implements AuthService {
     }
 
     return false;
+  }
+
+  private boolean removeAllSessions(String userId) {
+    if(userId == null) {
+      return false;
+    }
+
+    String userSessionsSetRedisKey = getUserSessionsSetRedisKey(userId);
+
+    ScanOptions scanOptions = ScanOptions.scanOptions().match(SESSION_SCAN_PATTERN).count(SESSION_SCAN_BATCH_SIZE).build();
+
+    try(Cursor<String> cursor = redisTemplate.opsForSet().scan(userSessionsSetRedisKey, scanOptions)) {
+      cursor.forEachRemaining(sessionId -> {
+        String sessionUserIdRedisKey = getSessionUserIdRedisKey(sessionId);
+        redisTemplate.delete(sessionUserIdRedisKey);
+      });
+    }
+
+    redisTemplate.delete(userSessionsSetRedisKey);
+    return true;
   }
 }
