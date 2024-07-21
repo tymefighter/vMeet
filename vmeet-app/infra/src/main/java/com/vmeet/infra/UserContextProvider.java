@@ -4,11 +4,11 @@ public class UserContextProvider {
   private UserContextProvider() {}
 
   public static class UserContext {
-    private static String userId;
+    private String userId;
 
     private UserContext() {}
 
-    public static String getUserId() {
+    public String getUserId() {
       return userId;
     }
   }
