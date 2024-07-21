@@ -1,9 +1,6 @@
 package com.vmeet.graphql;
 
-import com.vmeet.data.user.CreateUserDTO;
-import com.vmeet.data.user.UpdateUserDTO;
-import com.vmeet.data.user.UserDTO;
-import com.vmeet.data.user.UserRepository;
+import com.vmeet.data.user.*;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLNonNull;
 import io.leangen.graphql.annotations.GraphQLQuery;

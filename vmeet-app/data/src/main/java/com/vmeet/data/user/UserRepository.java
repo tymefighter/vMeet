@@ -8,4 +8,8 @@ public interface UserRepository {
   UserDTO updateUser(UpdateUserDTO userDTO);
 
   List<UserDTO> getUsers();
+
+  UserDTO getUser(UserRequestDTO userRequestDTO);
+
+  boolean checkExistence(UserRequestDTO userRequestDTO);
 }

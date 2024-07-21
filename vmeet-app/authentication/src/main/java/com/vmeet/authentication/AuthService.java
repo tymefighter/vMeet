@@ -1,7 +1,7 @@
 package com.vmeet.authentication;
 
 public interface AuthService {
-  boolean login(LoginRequestDTO loginRequestDTO);
+  LoginResponse login(LoginRequestDTO loginRequestDTO);
 
-  boolean logout();
+  boolean logout(LogoutRequestDTO logoutRequestDTO);
 }

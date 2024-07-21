@@ -61,4 +61,45 @@ public class UserRepositoryImpl implements UserRepository {
   public List<UserDTO> getUsers() {
     return mongoTemplate.findAll(User.class).stream().map(UserDTO::new).toList();
   }
+
+  @Override
+  public UserDTO getUser(UserRequestDTO userRequestDTO) {
+    Criteria criteria = getCriteria(userRequestDTO);
+
+    User user = mongoTemplate.findOne(Query.query(criteria), User.class);
+    return user == null ? null : new UserDTO(user);
+  }
+
+  @Override
+  public boolean checkExistence(UserRequestDTO userRequestDTO) {
+    Criteria criteria = getCriteria(userRequestDTO);
+
+    return mongoTemplate.exists(Query.query(criteria), User.class);
+  }
+
+  private Criteria getCriteria(UserRequestDTO userRequestDTO) {
+    Criteria criteria = new Criteria();
+
+    if (userRequestDTO.getId() != null) {
+      criteria = criteria.and(User.ID_FIELD).is(userRequestDTO.getId());
+    }
+
+    if (userRequestDTO.getName() != null) {
+      criteria = criteria.and(User.NAME_FIELD).is(userRequestDTO.getName());
+    }
+
+    if (userRequestDTO.getEmailAddress() != null) {
+      criteria = criteria.and(User.EMAIL_ADDRESS_FIELD).is(userRequestDTO.getEmailAddress());
+    }
+
+    if (userRequestDTO.getPhoneNumber() != null) {
+      criteria = criteria.and(User.PHONE_NUMBER_FIELD).is(userRequestDTO.getPhoneNumber());
+    }
+
+    if (userRequestDTO.getPassword() != null) {
+      criteria = criteria.and(User.PASSWORD_HASH_FIELD).is(UserUtils.hashPassword(userRequestDTO.getPassword()));
+    }
+
+    return criteria;
+  }
 }
