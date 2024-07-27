@@ -1,0 +1,8 @@
+.gradle
+
+build
+
+.idea
+
+Dockerfile
+docker-compose.yml

@@ -31,3 +31,13 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+dependencyManagement {
+    imports {
+        mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
+    }
+}
+
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-parameters")
+}
