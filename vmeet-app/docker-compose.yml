@@ -1,0 +1,43 @@
+services:
+  app:
+    build: .
+    networks:
+      - vMeet-network
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+      - mongo
+      - elastic
+    environment:
+      REDIS_HOST: redis
+      MONGO_HOST: mongo
+      ELASTIC_HOST: elastic
+
+  redis:
+    image: redis/redis-stack:7.2.0-v11
+    networks:
+      - vMeet-network
+
+  mongo:
+    image: mongodb/mongodb-community-server:5.0.14-ubi8
+    networks:
+      - vMeet-network
+
+  elastic:
+    image: elasticsearch:8.14.3
+    networks:
+      - vMeet-network
+    environment:
+      discovery.type: single-node
+
+  kibana:
+    image: kibana:8.14.3
+    networks:
+      - vMeet-network
+    depends_on:
+      - elastic
+
+networks:
+  vMeet-network:
+    driver: bridge
