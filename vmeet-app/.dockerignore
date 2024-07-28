@@ -1,8 +1,12 @@
+# Build Tools
 .gradle
 
+# Build Directories
 build
 
+# IDE
 .idea
 
+# Docker
 Dockerfile
 docker-compose.yml
